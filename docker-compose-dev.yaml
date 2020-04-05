@@ -1,0 +1,53 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:10.5
+    restart: always
+    volumes:
+      - database_volume:/var/lib/postgresql/data
+    networks:
+      - database_network
+    env_file: .env.db
+
+  django:
+    build:
+      context: .
+      dockerfile: django.Dockerfile
+    depends_on:
+      - db
+    links:
+      - db
+    command: "python -u manage.py runserver 0.0.0.0:8000 --insecure"
+    volumes:
+      - ./backend:/usr/src/app
+    networks:
+      - database_network
+      - django_network
+    env_file: dev.env
+    ports:
+      - "8000:8000"
+
+  vue:
+    build:
+      context: .
+      dockerfile: vue.Dockerfile
+    depends_on:
+      - django
+    links:
+      - django
+    command: "yarn serve"
+    volumes:
+      - ./frontend:/usr/src/app
+    networks:
+      - django_network
+    env_file: dev.env
+    ports:
+      - "8080:8080"
+
+volumes:
+  database_volume:
+
+networks:
+  database_network:
+  django_network:
