@@ -41,7 +41,6 @@ services:
       - ./frontend:/usr/src/app
     networks:
       - django_network
-    env_file: dev.env
     ports:
       - "8080:8080"
 
